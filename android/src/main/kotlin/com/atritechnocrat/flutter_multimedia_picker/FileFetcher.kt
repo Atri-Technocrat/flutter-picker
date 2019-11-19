@@ -1,4 +1,4 @@
-package com.atritechnocrat.flutter_picker
+package com.atritechnocrat.flutter_multimedia_picker
 
 import android.annotation.TargetApi
 import android.content.ContentUris
@@ -270,7 +270,7 @@ class FileFetcher {
           bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
         }
 
-        bitmap.recycle()
+        bitmap?.recycle()
 
         // Insert thumbnail path to the thumbnail media store
         updateThumbnailMediaStore(context, fileId, type, outputFile)
@@ -290,7 +290,7 @@ class FileFetcher {
 
           }
         }
-        bitmap.recycle()
+        bitmap?.recycle()
         return null
       }
     }

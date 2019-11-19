@@ -1,36 +1,35 @@
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 import 'data/MediaFile.dart';
 
-class FlutterPicker {
+class FlutterMultiMediaPicker {
   static const MethodChannel _channel =
-      const MethodChannel('flutter_picker');
+      const MethodChannel('fullter_multimedia_picker');
 
   static Future<List<MediaFile>> getAll() async {
-    final String json = await _channel.invokeMethod(
-        "getAll"
-    );
+    final String json = await _channel.invokeMethod("getAll");
     final encoded = jsonDecode(json);
-    return encoded.map<MediaFile>((mediaFile) => MediaFile.fromJson(mediaFile)).toList();
+    return encoded
+        .map<MediaFile>((mediaFile) => MediaFile.fromJson(mediaFile))
+        .toList();
   }
 
-
   static Future<List<MediaFile>> getImage() async {
-    final String json = await _channel.invokeMethod(
-        "getImage"
-    );
+    final String json = await _channel.invokeMethod("getImage");
     final encoded = jsonDecode(json);
-    return encoded.map<MediaFile>((mediaFile) => MediaFile.fromJson(mediaFile)).toList();
+    return encoded
+        .map<MediaFile>((mediaFile) => MediaFile.fromJson(mediaFile))
+        .toList();
   }
 
   static Future<List<MediaFile>> getVideo() async {
-    final String json = await _channel.invokeMethod(
-        "getVideo"
-    );
+    final String json = await _channel.invokeMethod("getVideo");
     final encoded = jsonDecode(json);
-    return encoded.map<MediaFile>((mediaFile) => MediaFile.fromJson(mediaFile)).toList();
+    return encoded
+        .map<MediaFile>((mediaFile) => MediaFile.fromJson(mediaFile))
+        .toList();
   }
 
   static Future<MediaFile> getMediaFile({
@@ -39,10 +38,7 @@ class FlutterPicker {
   }) async {
     final String json = await _channel.invokeMethod(
       'getMediaFile',
-      {
-        "fileId": fileId,
-        "type": type.index
-      },
+      {"fileId": fileId, "type": type.index},
     );
     final encoded = jsonDecode(json);
     return MediaFile.fromJson(encoded);

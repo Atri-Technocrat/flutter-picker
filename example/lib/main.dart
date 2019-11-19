@@ -1,14 +1,13 @@
 import 'dart:io';
-
-//import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:flutter_picker/flutter_picker.dart';
-import 'package:flutter_picker/data/MediaFile.dart';
+import 'package:flutter_multimedia_picker/fullter_multimedia_picker.dart';
+import 'package:flutter_multimedia_picker/data/MediaFile.dart';
+import 'package:flutter_multimedia_picker/widget/PickerWidget.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-import 'PickerWidget.dart';
-
-void main() => runApp(MaterialApp(
+void main() =>
+    runApp(MaterialApp(
       title: "App",
       home: MyApp(),
     ));
@@ -24,51 +23,51 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+
+    _checkPermission().then((granted) {
+      if (!granted) return;
+    });
   }
 
-  /*Future<bool> _checkPermission() async {
+  Future<bool> _checkPermission() async {
     final permissionStorageGroup =
-        Platform.isIOS ? PermissionGroup.photos : PermissionGroup.storage;
+    Platform.isIOS ? PermissionGroup.photos : PermissionGroup.storage;
     Map<PermissionGroup, PermissionStatus> res =
-        await PermissionHandler().requestPermissions([
+    await PermissionHandler().requestPermissions([
       permissionStorageGroup,
     ]);
     return res[permissionStorageGroup] == PermissionStatus.granted;
-  }*/
+  }
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> getMedia() async {
     try {
-      List<MediaFile> imageMediaFileList = await FlutterPicker.getImage();
-      print("imageMediaFileList");
-      print(imageMediaFileList);
+      List<MediaFile> imageMediaFileList =
+      await FlutterMultiMediaPicker.getImage();
 
-      List<MediaFile> videoMediaFileList = await FlutterPicker.getVideo();
-      print("videoMediaFileList");
-      print(videoMediaFileList);
+      List<MediaFile> videoMediaFileList =
+      await FlutterMultiMediaPicker.getVideo();
 
-      MediaFile imageMediaFile1 = await FlutterPicker.getMediaFile(
-          fileId: imageMediaFileList[0].id, type: MediaType.IMAGE);
-      print("imageMediaFile1");
-      print(imageMediaFile1.thumbnailPath);
-
-      MediaFile videoMediaFile1 = await FlutterPicker.getMediaFile(
-          fileId: videoMediaFileList[0].id, type: MediaType.VIDEO);
-      print("videoMediaFile1");
-      print(videoMediaFile1.thumbnailPath);
+      List<MediaFile> allMediaFileList = await FlutterMultiMediaPicker.getAll();
 
       if (imageMediaFileList.length > 0) {
-        String imageMediaFile2 = await FlutterPicker.getThumbnail(
+        MediaFile imageMedia = await FlutterMultiMediaPicker.getMediaFile(
             fileId: imageMediaFileList[0].id, type: MediaType.IMAGE);
-        print("imageMediaFile2");
-        print(imageMediaFile2);
       }
 
       if (videoMediaFileList.length > 0) {
-        String videoMediaFile2 = await FlutterPicker.getThumbnail(
+        MediaFile videoMedia = await FlutterMultiMediaPicker.getMediaFile(
             fileId: videoMediaFileList[0].id, type: MediaType.VIDEO);
-        print("videoMediaFile2");
-        print(videoMediaFile2);
+      }
+
+      if (imageMediaFileList.length > 0) {
+        String imageMedia = await FlutterMultiMediaPicker.getThumbnail(
+            fileId: imageMediaFileList[0].id, type: MediaType.IMAGE);
+      }
+
+      if (videoMediaFileList.length > 0) {
+        String videoMedia = await FlutterMultiMediaPicker.getThumbnail(
+            fileId: videoMediaFileList[0].id, type: MediaType.VIDEO);
       }
     } on Exception {
       print("Exception");
@@ -87,7 +86,7 @@ class _MyAppState extends State<MyApp> {
             RaisedButton(
                 child: const Text("Show All Media"),
                 onPressed: () {
-                  FlutterPicker.getAll().then((mediaFiles) {
+                  FlutterMultiMediaPicker.getAll().then((mediaFiles) {
                     //print(mediaFiles);
                     _awaitReturnValueFromSecondScreen(context, mediaFiles);
                   });
@@ -95,7 +94,7 @@ class _MyAppState extends State<MyApp> {
             RaisedButton(
                 child: const Text("Show Image Media"),
                 onPressed: () {
-                  FlutterPicker.getImage().then((mediaFiles) {
+                  FlutterMultiMediaPicker.getImage().then((mediaFiles) {
                     //print(mediaFiles);
                     _awaitReturnValueFromSecondScreen(context, mediaFiles);
                   });
@@ -103,7 +102,7 @@ class _MyAppState extends State<MyApp> {
             RaisedButton(
                 child: const Text("Show Video Media"),
                 onPressed: () {
-                  FlutterPicker.getVideo().then((mediaFiles) {
+                  FlutterMultiMediaPicker.getVideo().then((mediaFiles) {
                     //print(mediaFiles);
                     _awaitReturnValueFromSecondScreen(context, mediaFiles);
                   });
@@ -115,25 +114,58 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void _awaitReturnValueFromSecondScreen(
-      BuildContext context, List<MediaFile> mediaFiles) async {
+  void _awaitReturnValueFromSecondScreen(BuildContext context,
+      List<MediaFile> mediaFiles) async {
     // start the SecondScreen and wait for it to finish with a result
     Set<MediaFile> result = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PickerWidget(mediaFiles),
+          builder: (context) => PickerScreen(mediaFiles),
         ));
 
     // after the SecondScreen result comes back update the Text widget with it
 
-    if(result == null)
-      {
-        return;
-      }
+    if (result == null) {
+      return;
+    }
 
     setState(() {
       int size = result.length;
       selectText = "Selected Media Size $size";
     });
   }
+}
+
+
+class PickerScreen extends StatefulWidget {
+
+  List<MediaFile> mediaFiles;
+
+  PickerScreen(this.mediaFiles);
+
+  @override
+  _PickerScreenState createState() => _PickerScreenState();
+}
+
+class _PickerScreenState extends State<PickerScreen> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Media Picker"),
+        ),
+        body: Center(
+          child: PickerWidget(widget.mediaFiles, onDone, onCancel),
+        ));
+  }
+
+  onDone(Set<MediaFile> selectedFiles) {
+    Navigator.pop(context, selectedFiles);
+  }
+
+  onCancel() {
+    Navigator.pop(context);
+  }
+
 }

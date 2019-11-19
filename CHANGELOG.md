@@ -1,3 +1,11 @@
-## 0.0.1
+## 1.0.0
 
-* TODO: Describe initial release.
+* Initial release
+
+## 1.0.1
+
+* Example Added
+
+## 1.0.2
+
+* Full Example Added
